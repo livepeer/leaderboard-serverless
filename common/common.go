@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -32,6 +31,5 @@ func HandleBadRequest(w http.ResponseWriter, err error) {
 }
 
 func RespondWithError(w http.ResponseWriter, err error, code int) {
-	fmt.Println(err)
 	http.Error(w, err.Error(), code)
 }
