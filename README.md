@@ -1,8 +1,30 @@
 # Leaderboard-Serverless
 
+## Development
+
+All endpoints live in the `/api` folder, every file represents an endpoint and should export a function following the `net/http` handler interface 
+
+```
+Handler(w http.ResponseWriter, r *http.Request)
+```
+
+#### Install Vercel CLI 
+
+```
+$ npm i -g vercel
+```
+
+#### Run Dev Server
+
+```
+$ vercel dev
+```
+
+This will start a local server on `localhost:3000` 
+
 ## API
 
-### `GET /aggregated_stats?orchestrator=<orchAddr>&region=<Airport_code>&since=<timestamp>`
+#### `GET /api/aggregated_stats?orchestrator=<orchAddr>&region=<Airport_code>&since=<timestamp>`
 
 - If `orchestrator` is not provided the response will include aggregated scores for all orchestrators
 
@@ -35,7 +57,7 @@
 }
 ```
 
-### `GET /raw_stats?orchestrator=<orchAddr>&region=<Airport_code>&since=<timestamp>`
+#### `GET /api/raw_stats?orchestrator=<orchAddr>&region=<Airport_code>&since=<timestamp>`
 
 If no parameter for `orchestrator` is provided the request will return `400 Bad Request` 
 
@@ -47,7 +69,7 @@ For each region return an array of the metrics from the 'metrics gathering' sect
 {
  "FRA": [
     {
-	"timestamp": number,
+	      "timestamp": number,
         "segments_sent": number,
         "segments_received": number,
         "success_rate": number,
@@ -66,7 +88,32 @@ For each region return an array of the metrics from the 'metrics gathering' sect
 }
 ```
 
-### POST `/post_stats
+#### POST `/api/post_stats`
+
+Request object 
+
+```
+type Stats struct {
+	ID                primitive.ObjectID `json:"-" bson:"_id,omitempty"`
+	Region            string             `json:"region" bson:"-"`
+	Orchestrator      string             `json:"orchestrator" bson:"orchestrator"`
+	SegmentsSent      int                `json:"segments_sent" bson:"segments_sent"`
+	SegmentsReceived  int                `json:"segments_received" bson:"segments_received"`
+	SuccessRate       float64            `json:"success_rate" bson:"success_rate"`
+	AvgSegDuration    int64              `json:"avg_seg_duration" bson:"avg_seg_duration"`
+	AvgUploadTime     int64              `json:"avg_upload_time" bson:"avg_upload_time"`
+	AvgUploadScore    float64            `json:"avg_upload_score" bson:"avg_upload_score"`
+	AvgDownloadTime   int64              `json:"avg_download_time" bson:"avg_download_time"`
+	AvgDownloadScore  float64            `json:"avg_download_score" bson:"avg_download_score"`
+	AvgTranscodeTime  int64              `json:"avg_transcode_time" bson:"avg_transcode_time"`
+	AvgTranscodeScore float64            `json:"avg_transcode_score" bson:"avg_transcode_score"`
+	RoundTripScore    float64            `json:"round_trip_score" bson:"round_trip_score"`
+	Errors            []string           `json:"errors" bson:"errors"`
+	Timestamp         int64              `json:"timestamp" bson:"timestamp"`
+}
+```
+
+Region must be one of `"FRA", "MDW", "SIN"`
 
 ## Deployment Using Vercel
 
