@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -42,7 +43,7 @@ func RawStatsHandler(w http.ResponseWriter, r *http.Request) {
 	sinceStr := query.Get("since")
 
 	if orch == "" {
-		common.HandleBadRequest(w, err)
+		common.HandleBadRequest(w, errors.New("orchestrator is a required parameter"))
 		return
 	}
 
