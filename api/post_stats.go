@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -31,6 +32,11 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !isValidRegion(stats.Region) {
+		common.HandleBadRequest(w, errors.New("invalid region"))
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
 	if err := mongo.Client.Ping(ctx, readpref.Primary()); err != nil {
@@ -47,4 +53,13 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 	//Return inserts Object ID and  200 StatusCode response with AWS Lambda Proxy Response
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("ok"))
+}
+
+func isValidRegion(region string) bool {
+	for _, reg := range mongo.Regions {
+		if reg == region {
+			return true
+		}
+	}
+	return false
 }
