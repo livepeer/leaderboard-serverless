@@ -20,7 +20,19 @@ $ npm i -g vercel
 $ vercel dev
 ```
 
-This will start a local server on `localhost:3000` 
+This will start a local server on `localhost:3000`
+
+##### ENV Variables
+
+For the endpoints to run you must define a storage options through environment variables. 
+
+Either one of  
+- MONGO=<mongodb+srv://...>
+- POSTGRES=<postgres://...>
+
+## Storage Options
+
+Both MongoDB and Postgres are supported, your favorite storage layer is enabled simply through choosing either to connect to through its respective environment variable.
 
 ## API
 
@@ -28,7 +40,7 @@ This will start a local server on `localhost:3000`
 
 - If `orchestrator` is not provided the response will include aggregated scores for all orchestrators
 
-- If `region is not provided all regions will be returned in the response. "GLOBAL" would be included as well which would be the average of the regions. 
+- If `region` is not provided all regions will be returned in the response. "GLOBAL" would be included as well which would be the average of the regions. 
 
 - If `since` is not provided we will default to something sensible, for example 24h. 
 
