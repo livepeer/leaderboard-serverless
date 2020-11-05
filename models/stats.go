@@ -1,6 +1,15 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+// Regions (collections)
+var Regions = []string{"MDW", "FRA", "SIN"}
 
 // AggregatedStats are the aggregated stats for an orchestrator
 type AggregatedStats struct {
@@ -27,4 +36,20 @@ type Stats struct {
 	RoundTripScore    float64            `json:"round_trip_score" bson:"round_trip_score"`
 	Errors            []string           `json:"errors" bson:"errors"`
 	Timestamp         int64              `json:"timestamp" bson:"timestamp"`
+}
+
+// Value implements the driver.Valuer interface from SQL
+// This function simply results the JSON-encoded representation of teh struct
+func (s Stats) Value() (driver.Value, error) {
+	return json.Marshal(s)
+}
+
+// Scan implements the sql.Scanner interface. This method simply decodes a JSON represenation of the struct
+func (s *Stats) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &s)
 }
