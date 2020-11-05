@@ -1,23 +1,20 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"math/rand"
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"livepeer.org/leaderboard/db"
 	"livepeer.org/leaderboard/models"
-	"livepeer.org/leaderboard/mongo"
 )
 
 const addressSize = 20
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
-	defer cancel()
-	if err := mongo.Start(ctx); err != nil {
+	store, err := db.Start()
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -29,10 +26,9 @@ func main() {
 
 	for _, o := range orchestrators {
 		for i := 0; i < 15; i++ {
-			queryCtx, queryCancel := context.WithTimeout(context.Background(), 5*time.Second)
 
-			stats := models.Stats{
-				Region:            mongo.Regions[i%2],
+			stats := &models.Stats{
+				Region:            models.Regions[i%2],
 				Orchestrator:      o,
 				SegmentsSent:      rand.Int(),
 				SegmentsReceived:  rand.Int(),
@@ -48,9 +44,9 @@ func main() {
 				Timestamp:         time.Now().Unix(),
 			}
 
-			result, err := mongo.DB.Collection(stats.Region).InsertOne(queryCtx, stats)
-			fmt.Println(result, err)
-			queryCancel()
+			if err := store.InsertStats(stats); err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
