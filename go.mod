@@ -1,4 +1,4 @@
-module livepeer.org/leaderboard
+module github.com/livepeer/leaderboard-serverless
 
 go 1.13
 
