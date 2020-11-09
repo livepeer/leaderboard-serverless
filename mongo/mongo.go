@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/livepeer/leaderboard-serverless/models"
 	"go.mongodb.org/mongo-driver/bson"
 	mongodb "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"livepeer.org/leaderboard/models"
 )
 
 type DB struct {

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"livepeer.org/leaderboard/common"
-	"livepeer.org/leaderboard/db"
-	"livepeer.org/leaderboard/models"
+	"github.com/livepeer/leaderboard-serverless/common"
+	"github.com/livepeer/leaderboard-serverless/db"
+	"github.com/livepeer/leaderboard-serverless/models"
 )
 
 // AggregatedStatsHandler handles an aggregated leaderboard stats request

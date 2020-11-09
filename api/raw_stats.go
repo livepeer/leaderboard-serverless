@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net/http"
 
-	"livepeer.org/leaderboard/common"
-	"livepeer.org/leaderboard/db"
-	"livepeer.org/leaderboard/models"
+	"github.com/livepeer/leaderboard-serverless/common"
+	"github.com/livepeer/leaderboard-serverless/db"
+	"github.com/livepeer/leaderboard-serverless/models"
 )
 
 // RawStatsHandler handles a request for raw leaderboard stats

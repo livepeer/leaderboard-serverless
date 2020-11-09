@@ -4,9 +4,9 @@ import (
 	"errors"
 	"os"
 
-	"livepeer.org/leaderboard/models"
-	"livepeer.org/leaderboard/mongo"
-	"livepeer.org/leaderboard/postgres"
+	"github.com/livepeer/leaderboard-serverless/models"
+	"github.com/livepeer/leaderboard-serverless/mongo"
+	"github.com/livepeer/leaderboard-serverless/postgres"
 )
 
 var Store DB

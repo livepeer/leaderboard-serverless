@@ -6,8 +6,8 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"livepeer.org/leaderboard/db"
-	"livepeer.org/leaderboard/models"
+	"github.com/livepeer/leaderboard-serverless/db"
+	"github.com/livepeer/leaderboard-serverless/models"
 )
 
 const addressSize = 20

@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"livepeer.org/leaderboard/models"
+	"github.com/livepeer/leaderboard-serverless/models"
 
 	_ "github.com/lib/pq"
 )
