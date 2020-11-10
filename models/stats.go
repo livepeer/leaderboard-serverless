@@ -34,8 +34,13 @@ type Stats struct {
 	AvgTranscodeTime  float64            `json:"avg_transcode_time" bson:"avg_transcode_time"`
 	AvgTranscodeScore float64            `json:"avg_transcode_score" bson:"avg_transcode_score"`
 	RoundTripScore    float64            `json:"round_trip_score" bson:"round_trip_score"`
-	Errors            []string           `json:"errors" bson:"errors"`
+	Errors            []Error            `json:"errors" bson:"errors"`
 	Timestamp         int64              `json:"timestamp" bson:"timestamp"`
+}
+
+type Error struct {
+	ErrorCode string `json:"error_code" bson:"error_code"`
+	Count     int    `json:"count" bson:"count"`
 }
 
 // Value implements the driver.Valuer interface from SQL
