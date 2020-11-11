@@ -42,6 +42,16 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 		common.HandleInternalError(w, err)
 	}
 
+	// Set CORS headers for the preflight request
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	
 	//Return inserts Object ID and  200 StatusCode response with AWS Lambda Proxy Response
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("ok"))
