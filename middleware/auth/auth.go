@@ -7,8 +7,6 @@ import (
 	"os"
 )
 
-// 403 Forbidden
-
 func IsAuthorized(authHeader string, body []byte) bool {
 	hash := hmac.New(sha256.New, []byte(os.Getenv("SECRET")))
 	hash.Write(body)
