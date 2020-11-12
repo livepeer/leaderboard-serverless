@@ -8,6 +8,8 @@ import (
 
 	"github.com/livepeer/leaderboard-serverless/common"
 	"github.com/livepeer/leaderboard-serverless/db"
+	"github.com/livepeer/leaderboard-serverless/middleware"
+	"github.com/livepeer/leaderboard-serverless/middleware/auth"
 	"github.com/livepeer/leaderboard-serverless/models"
 )
 
@@ -18,9 +20,10 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	middleware.HandlePreflightRequest(w, r)
+
 	var stats models.Stats
 
-	// Unmarshal the json, return 400 if error
 	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -28,6 +31,15 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if ok := auth.IsAuthorized(
+		r.Header.Get("Authorization"),
+		body,
+	); !ok {
+		common.RespondWithError(w, errors.New("request can not be authenticated"), http.StatusForbidden)
+		return
+	}
+
+	// Unmarshal the json, return 400 if error
 	if err := json.Unmarshal([]byte(body), &stats); err != nil {
 		common.HandleBadRequest(w, err)
 		return
