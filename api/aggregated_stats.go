@@ -16,6 +16,10 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "max-age=60, public")
+
 	//Get the path parameter that was sent
 	query := r.URL.Query()
 	orch := query.Get("orchestrator")
@@ -52,8 +56,6 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "max-age=60, public")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resultsEncoded)
 }
