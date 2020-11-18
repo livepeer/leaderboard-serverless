@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/livepeer/leaderboard-serverless/common"
 	"github.com/livepeer/leaderboard-serverless/db"
@@ -26,11 +28,22 @@ func RawStatsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	orch := query.Get("orchestrator")
 	region := query.Get("region")
-	since := query.Get("since")
+	sinceStr := query.Get("since")
 
 	if orch == "" {
 		common.HandleBadRequest(w, errors.New("orchestrator is a required parameter"))
 		return
+	}
+
+	var since int64
+	if sinceStr == "" {
+		since = time.Now().Add(-24 * time.Hour).Unix()
+	} else {
+		var err error
+		since, err = strconv.ParseInt(sinceStr, 10, 64)
+		if err != nil {
+			common.HandleBadRequest(w, err)
+		}
 	}
 
 	searchRegions := models.Regions

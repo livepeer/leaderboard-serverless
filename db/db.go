@@ -13,8 +13,8 @@ var Store DB
 
 type DB interface {
 	InsertStats(stats *models.Stats) error
-	AggregatedStats(orch, region, since string) ([]*models.AggregatedStats, error)
-	RawStats(orch, region, since string) ([]*models.Stats, error)
+	AggregatedStats(orch, region string, since int64) ([]*models.AggregatedStats, error)
+	RawStats(orch, region string, since int64) ([]*models.Stats, error)
 }
 
 func Start() (DB, error) {

@@ -2,9 +2,7 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/livepeer/leaderboard-serverless/models"
@@ -49,19 +47,7 @@ func (db *DB) InsertStats(stats *models.Stats) error {
 	return nil
 }
 
-func (db *DB) AggregatedStats(orch, region, sinceStr string) ([]*models.AggregatedStats, error) {
-	var since int64
-	if sinceStr == "" {
-		since = time.Now().Add(-24 * time.Hour).Unix()
-	} else {
-		var err error
-		since, err = strconv.ParseInt(sinceStr, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-	}
-	fmt.Println(since)
-
+func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.AggregatedStats, error) {
 	// Query MongoDB
 	opts := options.Aggregate()
 	opts.SetAllowDiskUse(true)
@@ -121,18 +107,7 @@ func (db *DB) AggregatedStats(orch, region, sinceStr string) ([]*models.Aggregat
 
 }
 
-func (db *DB) RawStats(orch, region, sinceStr string) ([]*models.Stats, error) {
-	var since int64
-	if sinceStr == "" {
-		since = time.Now().Add(-24 * time.Hour).Unix()
-	} else {
-		var err error
-		since, err = strconv.ParseInt(sinceStr, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-	}
-
+func (db *DB) RawStats(orch, region string, since int64) ([]*models.Stats, error) {
 	opts := options.Find()
 	// Descending: latest first
 	opts.SetSort(bson.D{{Key: "timestamp", Value: -1}})

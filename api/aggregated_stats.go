@@ -3,6 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/livepeer/leaderboard-serverless/common"
 	"github.com/livepeer/leaderboard-serverless/db"
@@ -24,11 +26,22 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	orch := query.Get("orchestrator")
 	region := query.Get("region")
-	since := query.Get("since")
+	sinceStr := query.Get("since")
 
 	searchRegions := models.Regions
 	if region != "" {
 		searchRegions = []string{region}
+	}
+
+	var since int64
+	if sinceStr == "" {
+		since = time.Now().Add(-24 * time.Hour).Unix()
+	} else {
+		var err error
+		since, err = strconv.ParseInt(sinceStr, 10, 64)
+		if err != nil {
+			common.HandleBadRequest(w, err)
+		}
 	}
 
 	results := make(map[string]map[string]*models.AggregatedStats)
