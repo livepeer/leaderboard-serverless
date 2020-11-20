@@ -33,7 +33,8 @@ type Stats struct {
 	AvgDownloadScore  float64            `json:"avg_download_score" bson:"avg_download_score"`
 	AvgTranscodeTime  float64            `json:"avg_transcode_time" bson:"avg_transcode_time"`
 	AvgTranscodeScore float64            `json:"avg_transcode_score" bson:"avg_transcode_score"`
-	RoundTripScore    float64            `json:"round_trip_score" bson:"round_trip_score"`
+	AvgRoundTripScore float64            `json:"round_trip_score" bson:"avground_trip_score"`
+	TotalScore        float64            `json:"total_score"`
 	Errors            []Error            `json:"errors" bson:"errors"`
 	Timestamp         int64              `json:"timestamp" bson:"timestamp"`
 }
