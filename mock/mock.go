@@ -40,7 +40,8 @@ func main() {
 				AvgDownloadScore:  rand.Float64() * 10,
 				AvgTranscodeTime:  rand.Float64(),
 				AvgTranscodeScore: rand.Float64() * 10,
-				RoundTripScore:    rand.Float64() * 10,
+				AvgRoundTripScore: rand.Float64() * 10,
+				TotalScore:        rand.ExpFloat64() * 10,
 				Timestamp:         time.Now().Unix(),
 			}
 
