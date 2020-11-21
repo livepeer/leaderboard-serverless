@@ -16,6 +16,7 @@ type AggregatedStats struct {
 	ID          string  `json:"-" bson:"_id,omitempty"`
 	Score       float64 `bson:"score" json:"score"`
 	SuccessRate float64 `bson:"success_rate" json:"success_rate"`
+	AvgLatency  float64 `bson:"avg_latency" json:"avg_latency"`
 }
 
 // Stats are the raw stats per test stream
@@ -33,7 +34,8 @@ type Stats struct {
 	AvgDownloadScore  float64            `json:"avg_download_score" bson:"avg_download_score"`
 	AvgTranscodeTime  float64            `json:"avg_transcode_time" bson:"avg_transcode_time"`
 	AvgTranscodeScore float64            `json:"avg_transcode_score" bson:"avg_transcode_score"`
-	AvgRoundTripScore float64            `json:"round_trip_score" bson:"avground_trip_score"`
+	AvgRoundTripTime  float64            `json:"avg_round_trip_time" bson:"avg_round_trip_time"`
+	AvgRoundTripScore float64            `json:"round_trip_score" bson:"avg_round_trip_score"`
 	TotalScore        float64            `json:"total_score"`
 	Errors            []Error            `json:"errors" bson:"errors"`
 	Timestamp         int64              `json:"timestamp" bson:"timestamp"`
