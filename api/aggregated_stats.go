@@ -60,8 +60,13 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 			if !ok {
 				results[stat.ID] = make(map[string]*models.AggregatedStats)
 			}
-			stat.Score = calculateTotalScore(stat)
-			results[stat.ID][region] = stat
+			aggrStats := &models.AggregatedStats{
+				ID:             stat.ID,
+				SuccessRate:    stat.SuccessRate,
+				RoundTripScore: normalizeLatencyScore(calculateLatencyScore(stat.SegDuration, stat.RoundTripTime)),
+			}
+			aggrStats.TotalScore = calculateTotalScore(aggrStats)
+			results[stat.ID][region] = aggrStats
 		}
 	}
 
@@ -80,7 +85,14 @@ func calculateTotalScore(stats *models.AggregatedStats) float64 {
 		return 0
 	}
 
-	return stats.SuccessRate / 100 * normalizeLatencyScore(stats.RoundTripScore)
+	return stats.SuccessRate * stats.RoundTripScore
+}
+
+func calculateLatencyScore(segDuration, latency float64) float64 {
+	if latency == 0 {
+		return 0
+	}
+	return segDuration / latency
 }
 
 func normalizeLatencyScore(score float64) float64 {
