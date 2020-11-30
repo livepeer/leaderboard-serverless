@@ -43,8 +43,13 @@ func (db *DB) InsertStats(stats *models.Stats) error {
 	return err
 }
 
-func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.AggregatedStats, error) {
-	qry := fmt.Sprintf(`SELECT stats->>'orchestrator', avg(CAST(stats->>'total_score' as FLOAT)) as score, avg(CAST(stats->>'success_rate' as FLOAT)), avg(CAST(stats->>'round_trip_score' as FLOAT)) as avg_latency FROM %v WHERE (stats->>'timestamp')::int >= %v `, region, since)
+func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Stats, error) {
+	qry := fmt.Sprintf(`SELECT stats->>'orchestrator', 
+	avg(CAST(stats->>'success_rate' as FLOAT)) as success_rate, 
+	avg(CAST(stats->>'seg_duration' as FLOAT)) as seg_duration, 
+	avg(CAST(stats->>'round_trip_time' as FLOAT)) as round_trip_time  
+	FROM %v WHERE (stats->>'timestamp')::int >= %v `,
+		region, since)
 	if orch != "" {
 		qry += fmt.Sprintf(`AND stats->>'orchestrator' = '%v' `, orch)
 	}
@@ -56,18 +61,23 @@ func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Aggre
 		return nil, err
 	}
 	defer rows.Close()
-	stats := []*models.AggregatedStats{}
+	stats := []*models.Stats{}
 	for rows.Next() {
 		var (
-			id             string
-			score          float64
-			successRate    float64
-			roundTripScore float64
+			id            string
+			successRate   sql.NullFloat64
+			segDuration   sql.NullFloat64
+			roundTripTime sql.NullFloat64
 		)
-		if err := rows.Scan(&id, &score, &successRate, &roundTripScore); err != nil {
+		if err := rows.Scan(&id, &successRate, &segDuration, &roundTripTime); err != nil {
 			return nil, err
 		}
-		stats = append(stats, &models.AggregatedStats{ID: id, Score: score, SuccessRate: successRate, RoundTripScore: roundTripScore})
+		stats = append(stats, &models.Stats{
+			ID:            id,
+			SuccessRate:   successRate.Float64,
+			SegDuration:   segDuration.Float64,
+			RoundTripTime: roundTripTime.Float64,
+		})
 	}
 	return stats, nil
 }

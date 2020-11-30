@@ -47,7 +47,7 @@ func (db *DB) InsertStats(stats *models.Stats) error {
 	return nil
 }
 
-func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.AggregatedStats, error) {
+func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Stats, error) {
 	// Query MongoDB
 	opts := options.Aggregate()
 	opts.SetAllowDiskUse(true)
@@ -73,10 +73,13 @@ func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Aggre
 
 	grouper := bson.M{
 		"$group": bson.M{
-			"_id":              "$orchestrator",
-			"score":            bson.M{"$avg": "$round_trip_score"},
-			"success_rate":     bson.M{"$avg": "$success_rate"},
-			"round_trip_score": bson.M{"$avg": "$round_trip_score"},
+			"_id":             "$orchestrator",
+			"success_rate":    bson.M{"$avg": "$success_rate"},
+			"seg_duration":    bson.M{"$avg": "$seg_duration"},
+			"upload_time":     bson.M{"$avg": "$upload_time"},
+			"download_time":   bson.M{"$avg": "$download_time"},
+			"transcode_time":  bson.M{"$avg": "$transcode_time"},
+			"round_trip_time": bson.M{"$avg": "$round_trip_time"},
 		},
 	}
 
@@ -91,9 +94,9 @@ func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Aggre
 		return nil, err
 	}
 
-	var aggregatedStats []*models.AggregatedStats
+	var aggregatedStats []*models.Stats
 	for cursor.Next(ctx) {
-		var aggregatedStatsDoc models.AggregatedStats
+		var aggregatedStatsDoc models.Stats
 		if err := cursor.Decode(&aggregatedStatsDoc); err != nil {
 			return nil, err
 		}
