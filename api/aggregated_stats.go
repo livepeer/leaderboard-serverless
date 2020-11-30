@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -59,6 +60,7 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 			if !ok {
 				results[stat.ID] = make(map[string]*models.AggregatedStats)
 			}
+			stat.Score = calculateTotalScore(stat)
 			results[stat.ID][region] = stat
 		}
 	}
@@ -71,4 +73,16 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(resultsEncoded)
+}
+
+func calculateTotalScore(stats *models.AggregatedStats) float64 {
+	if stats == nil {
+		return 0
+	}
+
+	return stats.SuccessRate / 100 * normalizeLatencyScore(stats.RoundTripScore)
+}
+
+func normalizeLatencyScore(score float64) float64 {
+	return 1 - math.Pow(math.E, -score)
 }
