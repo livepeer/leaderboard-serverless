@@ -73,10 +73,10 @@ func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Aggre
 
 	grouper := bson.M{
 		"$group": bson.M{
-			"_id":          "$orchestrator",
-			"score":        bson.M{"$avg": "$round_trip_score"},
-			"success_rate": bson.M{"$avg": "$success_rate"},
-			"avg_latency":  bson.M{"$avg": "$avg_round_trip_time"},
+			"_id":              "$orchestrator",
+			"score":            bson.M{"$avg": "$round_trip_score"},
+			"success_rate":     bson.M{"$avg": "$success_rate"},
+			"round_trip_score": bson.M{"$avg": "$round_trip_score"},
 		},
 	}
 
