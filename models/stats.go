@@ -4,8 +4,6 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Regions (collections)
@@ -21,23 +19,19 @@ type AggregatedStats struct {
 
 // Stats are the raw stats per test stream
 type Stats struct {
-	ID                primitive.ObjectID `json:"-" bson:"_id,omitempty"`
-	Region            string             `json:"region" bson:"-"`
-	Orchestrator      string             `json:"orchestrator" bson:"orchestrator"`
-	SegmentsSent      int                `json:"segments_sent" bson:"segments_sent"`
-	SegmentsReceived  int                `json:"segments_received" bson:"segments_received"`
-	SuccessRate       float64            `json:"success_rate" bson:"success_rate"`
-	AvgSegDuration    float64            `json:"avg_seg_duration" bson:"avg_seg_duration"`
-	AvgUploadTime     float64            `json:"avg_upload_time" bson:"avg_upload_time"`
-	AvgUploadScore    float64            `json:"avg_upload_score" bson:"avg_upload_score"`
-	AvgDownloadTime   float64            `json:"avg_download_time" bson:"avg_download_time"`
-	AvgDownloadScore  float64            `json:"avg_download_score" bson:"avg_download_score"`
-	AvgTranscodeTime  float64            `json:"avg_transcode_time" bson:"avg_transcode_time"`
-	AvgTranscodeScore float64            `json:"avg_transcode_score" bson:"avg_transcode_score"`
-	AvgRoundTripTime  float64            `json:"avg_round_trip_time" bson:"avg_round_trip_time"`
-	AvgRoundTripScore float64            `json:"round_trip_score" bson:"round_trip_score"`
-	Errors            []Error            `json:"errors" bson:"errors"`
-	Timestamp         int64              `json:"timestamp" bson:"timestamp"`
+	ID               string  `json:"-" bson:"_id,omitempty"`
+	Region           string  `json:"region" bson:"-"`
+	Orchestrator     string  `json:"orchestrator" bson:"orchestrator"`
+	SegmentsSent     int     `json:"segments_sent" bson:"segments_sent"`
+	SegmentsReceived int     `json:"segments_received" bson:"segments_received"`
+	SuccessRate      float64 `json:"success_rate" bson:"success_rate"`
+	SegDuration      float64 `json:"seg_duration" bson:"seg_duration"`
+	UploadTime       float64 `json:"upload_time" bson:"upload_time"`
+	DownloadTime     float64 `json:"download_time" bson:"download_time"`
+	TranscodeTime    float64 `json:"transcode_time" bson:"transcode_time"`
+	RoundTripTime    float64 `json:"round_trip_time" bson:"round_trip_time"`
+	Errors           []Error `json:"errors" bson:"errors"`
+	Timestamp        int64   `json:"timestamp" bson:"timestamp"`
 }
 
 type Error struct {
@@ -46,7 +40,7 @@ type Error struct {
 }
 
 // Value implements the driver.Valuer interface from SQL
-// This function simply results the JSON-encoded representation of teh struct
+// This function simply results the JSON-encoded representation of the struct
 func (s Stats) Value() (driver.Value, error) {
 	return json.Marshal(s)
 }

@@ -28,20 +28,16 @@ func main() {
 		for i := 0; i < 15; i++ {
 
 			stats := &models.Stats{
-				Region:            models.Regions[i%2],
-				Orchestrator:      o,
-				SegmentsSent:      rand.Int(),
-				SegmentsReceived:  rand.Int(),
-				SuccessRate:       rand.Float64() * 100,
-				AvgSegDuration:    rand.Float64(),
-				AvgUploadTime:     rand.Float64(),
-				AvgUploadScore:    rand.Float64() * 10,
-				AvgDownloadTime:   rand.Float64(),
-				AvgDownloadScore:  rand.Float64() * 10,
-				AvgTranscodeTime:  rand.Float64(),
-				AvgTranscodeScore: rand.Float64() * 10,
-				AvgRoundTripScore: rand.Float64() * 10,
-				Timestamp:         time.Now().Unix(),
+				Region:           models.Regions[i%2],
+				Orchestrator:     o,
+				SegmentsSent:     rand.Int(),
+				SegmentsReceived: rand.Int(),
+				SuccessRate:      rand.Float64(),
+				SegDuration:      rand.Float64(),
+				UploadTime:       rand.Float64(),
+				DownloadTime:     rand.Float64(),
+				TranscodeTime:    rand.Float64(),
+				Timestamp:        time.Now().Unix(),
 			}
 
 			if err := store.InsertStats(stats); err != nil {
