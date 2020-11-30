@@ -13,10 +13,10 @@ var Regions = []string{"MDW", "FRA", "SIN"}
 
 // AggregatedStats are the aggregated stats for an orchestrator
 type AggregatedStats struct {
-	ID          string  `json:"-" bson:"_id,omitempty"`
-	Score       float64 `bson:"score" json:"score"`
-	SuccessRate float64 `bson:"success_rate" json:"success_rate"`
-	AvgLatency  float64 `bson:"avg_latency" json:"avg_latency"`
+	ID             string  `json:"-" bson:"_id,omitempty"`
+	Score          float64 `bson:"score" json:"score"`
+	SuccessRate    float64 `bson:"success_rate" json:"success_rate"`
+	RoundTripScore float64 `bson:"round_trip_score" json:"round_trip_score"`
 }
 
 // Stats are the raw stats per test stream
