@@ -37,6 +37,7 @@ func main() {
 				UploadTime:       rand.Float64(),
 				DownloadTime:     rand.Float64(),
 				TranscodeTime:    rand.Float64(),
+				RoundTripTime:    rand.Float64(),
 				Timestamp:        time.Now().Unix(),
 			}
 
