@@ -1,5 +1,10 @@
 # Leaderboard-Serverless
 
+## Deployments
+
+- Production API: https://leaderboard-serverless.vercel.app/api/
+- staging API: https://staging-leaderboard-serverless.vercel.app/api/
+
 ## Development
 
 All endpoints live in the `/api` folder, every file represents an endpoint and should export a function following the `net/http` handler interface 
