@@ -5,6 +5,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/livepeer/leaderboard-serverless/common"
@@ -25,8 +26,8 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	//Get the path parameter that was sent
 	query := r.URL.Query()
-	orch := query.Get("orchestrator")
-	region := query.Get("region")
+	orch := strings.ToLower(query.Get("orchestrator"))
+	region := strings.ToUpper(query.Get("region"))
 	sinceStr := query.Get("since")
 
 	searchRegions := models.Regions
