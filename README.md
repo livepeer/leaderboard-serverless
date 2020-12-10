@@ -20,15 +20,19 @@ $ npm i -g vercel
 $ vercel dev
 ```
 
-This will start a local server on `localhost:3000`
+This will start a local server on `localhost:3000`.
 
 ##### ENV Variables
 
+**Storage Option** 
 For the endpoints to run you must define a storage options through environment variables. 
 
 Either one of  
 - MONGO=<mongodb+srv://...>
 - POSTGRES=<postgres://...>
+
+**Secret** 
+The POST endpoint requires HMAC authentication. The server can be started with a `SECRET`, any clienting posting data will have to use the same `SECRET` to create a HMAC message based on the `SECRET` that can be provided in the `Authorization` header. 
 
 ## Storage Options
 
@@ -36,13 +40,13 @@ Both MongoDB and Postgres are supported, your favorite storage layer is enabled 
 
 ## API
 
-#### `GET /api/aggregated_stats?orchestrator=<orchAddr>&region=<Airport_code>&since=<timestamp>`
+#### `GET /api/aggregated_stats?orchestrator=<orchAddr>&region=<region_code>&since=<timestamp>`
 
-- If `orchestrator` is not provided the response will include aggregated scores for all orchestrators
+- The orchestrator to get aggregated stats for. If `orchestrator` is not provided the response will include aggregated scores for all orchestrators
 
-- If `region` is not provided all regions will be returned in the response. "GLOBAL" would be included as well which would be the average of the regions. 
+- The region to get aggregated stats for. If `region` is not provided all regions will be returned in the response. "GLOBAL" would be included as well which would be the average of the regions. Region must be one of `"FRA", "MDW", "SIN"`.
 
-- If `since` is not provided we will default to something sensible, for example 24h. 
+- The timestamp to evaluate the query from. If `since` is not provided it will return the results fore the last 24 hours. 
 
 **example response** 
 
@@ -50,15 +54,18 @@ Both MongoDB and Postgres are supported, your favorite storage layer is enabled 
 {
    "<orchAddr>": {
     "MDW": {
-    	"score": 5.5,
+    	"total_score": 5.5,
+      "latency_score": 6.01,
       "success_rate": 91.5
     },
     "FRA": {
-    	"score": 2.5,
+    	"total_score": 2.5,
+      "latency_score": 2.5,
       "success_rate": 100
     },
     "SIN": {
-    	"score": 6.6,
+    	"total_score": 6.6,
+      "latency_score": 7.10
 			"success_rate": 93
     }
   },
@@ -69,9 +76,14 @@ Both MongoDB and Postgres are supported, your favorite storage layer is enabled 
 }
 ```
 
-#### `GET /api/raw_stats?orchestrator=<orchAddr>&region=<Airport_code>&since=<timestamp>`
+#### `GET /api/raw_stats?orchestrator=<orchAddr>&region=<region_code>&since=<timestamp>`
 
-If no parameter for `orchestrator` is provided the request will return `400 Bad Request` 
+- The orchestrator's address to check raw stats for. If no parameter for `orchestrator` is provided the request will return `400 Bad Request`
+
+- The region to check stats for. If `region` is not provided all regions will be returned in the response. "GLOBAL" would be included as well which would be the average of the regions. Region must be one of `"FRA", "MDW", "SIN"`.
+
+- The timestamp to evaluate the query from. If `since` is not provided it will return the results fore the last 24 hours. 
+ 
 
 **example response**
 
@@ -85,13 +97,11 @@ For each region return an array of the metrics from the 'metrics gathering' sect
         "segments_sent": number,
         "segments_received": number,
         "success_rate": number,
-        "avg_seg_duration": number,
-        "avg_upload_time": number,
-        "avg_upload_score": number,
-        "avg_download_time": number,
-        "avg_download_score": number,
-        "avg_transcode_time": number,
-        "avg_transcode_score": number,
+        "seg_duration": number,
+        "upload_time": number,
+        "download_time": number,
+        "transcode_time": number,
+        "round_trip_time": number,
         "errors": Array
       }
    ],
@@ -112,14 +122,10 @@ type Stats struct {
 	SegmentsSent      int                `json:"segments_sent" bson:"segments_sent"`
 	SegmentsReceived  int                `json:"segments_received" bson:"segments_received"`
 	SuccessRate       float64            `json:"success_rate" bson:"success_rate"`
-	AvgSegDuration    int64              `json:"avg_seg_duration" bson:"avg_seg_duration"`
-	AvgUploadTime     int64              `json:"avg_upload_time" bson:"avg_upload_time"`
-	AvgUploadScore    float64            `json:"avg_upload_score" bson:"avg_upload_score"`
-	AvgDownloadTime   int64              `json:"avg_download_time" bson:"avg_download_time"`
-	AvgDownloadScore  float64            `json:"avg_download_score" bson:"avg_download_score"`
-	AvgTranscodeTime  int64              `json:"avg_transcode_time" bson:"avg_transcode_time"`
-	AvgTranscodeScore float64            `json:"avg_transcode_score" bson:"avg_transcode_score"`
-	RoundTripScore    float64            `json:"round_trip_score" bson:"round_trip_score"`
+	SegDuration    int64              `json:"seg_duration" bson:"seg_duration"`
+	UploadTime     int64              `json:"upload_time" bson:"upload_time"`
+	DownloadTime   int64              `json:"download_time" bson:"download_time"`
+	TranscodeTime  int64              `json:"transcode_time" bson:"avg_transcode_time"`
 	Errors            []string           `json:"errors" bson:"errors"`
 	Timestamp         int64              `json:"timestamp" bson:"timestamp"`
 }
