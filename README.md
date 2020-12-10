@@ -49,7 +49,7 @@ Both MongoDB and Postgres are supported, your favorite storage layer is enabled 
 
 - The orchestrator to get aggregated stats for. If `orchestrator` is not provided the response will include aggregated scores for all orchestrators
 
-- The region to get aggregated stats for. If `region` is not provided all regions will be returned in the response. "GLOBAL" would be included as well which would be the average of the regions. Region must be one of `"FRA", "MDW", "SIN"`.
+- The region to get aggregated stats for. If `region` is not provided all regions will be returned in the response. Region must be one of `"FRA", "MDW", "SIN"`.
 
 - The timestamp to evaluate the query from. If `since` is not provided it will return the results fore the last 24 hours. 
 
@@ -85,7 +85,7 @@ Both MongoDB and Postgres are supported, your favorite storage layer is enabled 
 
 - The orchestrator's address to check raw stats for. If no parameter for `orchestrator` is provided the request will return `400 Bad Request`
 
-- The region to check stats for. If `region` is not provided all regions will be returned in the response. "GLOBAL" would be included as well which would be the average of the regions. Region must be one of `"FRA", "MDW", "SIN"`.
+- The region to check stats for. If `region` is not provided all regions will be returned in the response. Region must be one of `"FRA", "MDW", "SIN"`.
 
 - The timestamp to evaluate the query from. If `since` is not provided it will return the results fore the last 24 hours. 
  
