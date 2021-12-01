@@ -30,6 +30,7 @@ func RawStatsHandler(w http.ResponseWriter, r *http.Request) {
 	orch := strings.ToLower(query.Get("orchestrator"))
 	region := strings.ToUpper(query.Get("region"))
 	sinceStr := query.Get("since")
+	untilStr := query.Get("until")
 
 	if orch == "" {
 		common.HandleBadRequest(w, errors.New("orchestrator is a required parameter"))
@@ -47,6 +48,17 @@ func RawStatsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var until int64
+	if untilStr == "" {
+		until = time.Now().Unix()
+	} else {
+		var err error
+		until, err = strconv.ParseInt(untilStr, 10, 64)
+		if err != nil {
+			common.HandleBadRequest(w, err)
+		}
+	}
+
 	searchRegions := models.Regions
 	if region != "" {
 		searchRegions = []string{region}
@@ -56,7 +68,7 @@ func RawStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Make this concurrent
 	for _, region := range searchRegions {
-		stats, err := db.Store.RawStats(orch, region, since)
+		stats, err := db.Store.RawStats(orch, region, since, until)
 		if err != nil {
 			common.HandleInternalError(w, err)
 			return
