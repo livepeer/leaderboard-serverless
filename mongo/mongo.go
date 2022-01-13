@@ -47,7 +47,7 @@ func (db *DB) InsertStats(stats *models.Stats) error {
 	return nil
 }
 
-func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Stats, error) {
+func (db *DB) AggregatedStats(orch, region string, since, until int64) ([]*models.Stats, error) {
 	// Query MongoDB
 	opts := options.Aggregate()
 	opts.SetAllowDiskUse(true)
@@ -57,6 +57,7 @@ func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Stats
 	and := []bson.M{
 		{"timestamp": bson.M{
 			"$gte": since,
+			"$lte": until,
 		},
 		},
 	}
@@ -111,14 +112,17 @@ func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Stats
 
 }
 
-func (db *DB) RawStats(orch, region string, since int64) ([]*models.Stats, error) {
+func (db *DB) RawStats(orch, region string, since, until int64) ([]*models.Stats, error) {
 	opts := options.Find()
 	// Descending: latest first
 	opts.SetSort(bson.D{{Key: "timestamp", Value: -1}})
 	filter := bson.D{
 		{
-			Key:   "timestamp",
-			Value: bson.D{{Key: "$gte", Value: since}},
+			Key: "timestamp",
+			Value: bson.D{
+				{Key: "$gte", Value: since},
+				{Key: "$lte", Value: until},
+			},
 		},
 		{
 			Key:   "orchestrator",
