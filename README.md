@@ -45,13 +45,14 @@ Both MongoDB and Postgres are supported, your favorite storage layer is enabled 
 
 ## API
 
-#### `GET /api/aggregated_stats?orchestrator=<orchAddr>&region=<region_code>&since=<timestamp>`
+#### `GET /api/aggregated_stats?orchestrator=<orchAddr>&region=<region_code>&since=<timestamp>&until=<timestamp>`
 
 - The orchestrator to get aggregated stats for. If `orchestrator` is not provided the response will include aggregated scores for all orchestrators
 
 - The region to get aggregated stats for. If `region` is not provided all regions will be returned in the response. Region must be one of `"FRA", "MDW", "SIN"`.
 
-- The timestamp to evaluate the query from. If `since` is not provided it will return the results fore the last 24 hours. 
+- The timestamp to evaluate the query from. If neither `since` nor `until` are provided it will return the results fore the last 24 hours. If `until` is provided but `since` is not, it will return all results before the `until` timestamp.
+
 
 **example response** 
 
