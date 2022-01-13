@@ -29,6 +29,7 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 	orch := strings.ToLower(query.Get("orchestrator"))
 	region := strings.ToUpper(query.Get("region"))
 	sinceStr := query.Get("since")
+	untilStr := query.Get("until")
 
 	searchRegions := models.Regions
 	if region != "" {
@@ -46,11 +47,22 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var until int64
+	if untilStr == "" {
+		until = time.Now().Unix()
+	} else {
+		var err error
+		until, err = strconv.ParseInt(untilStr, 10, 64)
+		if err != nil {
+			common.HandleBadRequest(w, err)
+		}
+	}
+
 	results := make(map[string]map[string]*models.AggregatedStats)
 
 	// TODO: Make this concurrent
 	for _, region := range searchRegions {
-		stats, err := db.Store.AggregatedStats(orch, region, since)
+		stats, err := db.Store.AggregatedStats(orch, region, since, until)
 		if err != nil {
 			common.HandleInternalError(w, err)
 			return

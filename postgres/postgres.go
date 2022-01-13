@@ -43,13 +43,13 @@ func (db *DB) InsertStats(stats *models.Stats) error {
 	return err
 }
 
-func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Stats, error) {
+func (db *DB) AggregatedStats(orch, region string, since, until int64) ([]*models.Stats, error) {
 	qry := fmt.Sprintf(`SELECT stats->>'orchestrator', 
 	avg(CAST(stats->>'success_rate' as FLOAT)) as success_rate, 
 	avg(CAST(stats->>'seg_duration' as FLOAT)) as seg_duration, 
 	avg(CAST(stats->>'round_trip_time' as FLOAT)) as round_trip_time  
-	FROM %v WHERE (stats->>'timestamp')::int >= %v `,
-		region, since)
+	FROM %v WHERE (stats->>'timestamp')::int >= %v AND (stats->>'timestamp')::int <= %v`,
+		region, since, until)
 	if orch != "" {
 		qry += fmt.Sprintf(`AND stats->>'orchestrator' = '%v' `, orch)
 	}
@@ -82,8 +82,8 @@ func (db *DB) AggregatedStats(orch, region string, since int64) ([]*models.Stats
 	return stats, nil
 }
 
-func (db *DB) RawStats(orch, region string, since int64) ([]*models.Stats, error) {
-	qry := fmt.Sprintf(`SELECT stats FROM %v WHERE stats->>'orchestrator' = '%v' AND stats->>'timestamp' >= '%v' ORDER BY stats->>'timestamp' DESC`, region, orch, since)
+func (db *DB) RawStats(orch, region string, since, until int64) ([]*models.Stats, error) {
+	qry := fmt.Sprintf(`SELECT stats FROM %v WHERE stats->>'orchestrator' = '%v' AND stats->>'timestamp' >= '%v' AND stats->>'timestamp' <= '%v' ORDER BY stats->>'timestamp' DESC`, region, orch, since, until)
 	rows, err := db.Query(qry)
 	if err != nil {
 		return nil, err
