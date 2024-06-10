@@ -86,7 +86,7 @@ Both MongoDB and Postgres are supported, your favorite storage layer is enabled 
 
 - The orchestrator's address to check raw stats for. If no parameter for `orchestrator` is provided the request will return `400 Bad Request`
 
-- The region to check stats for. If `region` is not provided all regions will be returned in the response. Region must be one of `"FRA", "MDW", "SIN"`.
+- The region to check stats for. If `region` is not provided all regions will be returned in the response.
 
 - The timestamp to evaluate the query from. If `since` is not provided it will return the results fore the last 24 hours. 
  
@@ -136,8 +136,6 @@ type Stats struct {
 	Timestamp         int64              `json:"timestamp" bson:"timestamp"`
 }
 ```
-
-Region must be one of `"FRA", "MDW", "SIN"`
 
 ## Deployment Using Vercel
 
