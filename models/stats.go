@@ -7,7 +7,7 @@ import (
 )
 
 // Regions (collections)
-var Regions = []string{"MDW", "FRA", "SIN", "NYC", "LAX", "LON", "PRG", "SAO", "ATL", "HND", "MAD", "MIA", "MOS2", "STO", "SYD", "SEA"}
+var Regions = []string{"MDW", "FRA", "SIN", "NYC", "LAX", "LON", "PRG", "SAO", "ATL", "HND", "MAD", "MIA", "MOS2", "STO", "SYD", "SEA", "TOR", "SJO", "ASH", "HOU", "ATL2"}
 
 // AggregatedStats are the aggregated stats for an orchestrator
 type AggregatedStats struct {
