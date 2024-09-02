@@ -65,10 +65,16 @@ func (s *Stats) Scan(value interface{}) error {
 }
 
 func GetRegions() []string {
+	mu.RLock()
 	if !RegionsLastUpdate.IsZero() && time.Since(RegionsLastUpdate).Seconds() < 60 {
 		// return cached list of regions
+		mu.RUnlock()
 		return Regions
 	}
+	mu.RUnlock()
+	
+	mu.Lock()
+	defer mu.UnLock()
 
 	catalystJSONURL, exists := os.LookupEnv("CATALYSTS_JSON")
 	if !exists {
