@@ -16,6 +16,7 @@ import (
 var (
 	Regions           []string
 	RegionsLastUpdate time.Time
+	mu sync.RWMutex
 )
 
 // AggregatedStats are the aggregated stats for an orchestrator
