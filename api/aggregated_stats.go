@@ -31,7 +31,7 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 	sinceStr := query.Get("since")
 	untilStr := query.Get("until")
 
-	searchRegions := models.Regions
+	searchRegions := models.GetRegions()
 	if region != "" {
 		searchRegions = []string{region}
 	}

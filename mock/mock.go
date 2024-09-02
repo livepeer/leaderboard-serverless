@@ -24,11 +24,12 @@ func main() {
 	// 	orchestrators = append(orchestrators, randAddress())
 	// }
 
+	regions := models.GetRegions()
 	for _, o := range orchestrators {
 		for i := 0; i < 15; i++ {
 
 			stats := &models.Stats{
-				Region:           models.Regions[i%2],
+				Region:           regions[i%2],
 				Orchestrator:     o,
 				SegmentsSent:     rand.Int(),
 				SegmentsReceived: rand.Int(),

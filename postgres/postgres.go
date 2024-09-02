@@ -110,7 +110,7 @@ func (db *DB) ensureDatabase() error {
 }
 
 func (db *DB) ensureTables() error {
-	for _, region := range models.Regions {
+	for _, region := range models.GetRegions() {
 		_, err := db.Exec(fmt.Sprintf(`
 		CREATE TABLE %s (
 			id SERIAL PRIMARY KEY,
