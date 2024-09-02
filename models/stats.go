@@ -76,7 +76,7 @@ func GetRegions() []string {
 	mu.RUnlock()
 	
 	mu.Lock()
-	defer mu.UnLock()
+	defer mu.Unlock()
 
 	catalystJSONURL, exists := os.LookupEnv("CATALYSTS_JSON")
 	if !exists {
