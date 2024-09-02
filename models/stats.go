@@ -70,7 +70,7 @@ func GetRegions() []string {
 	mu.RLock()
 	if !RegionsLastUpdate.IsZero() && time.Since(RegionsLastUpdate).Seconds() < 60 {
 		// return cached list of regions
-		mu.RUnlock()
+		defer mu.RUnlock()
 		return Regions
 	}
 	mu.RUnlock()
