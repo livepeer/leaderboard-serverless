@@ -4,10 +4,21 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"sync"
+	"time"
 )
 
 // Regions (collections)
-var Regions = []string{"MDW", "FRA", "SIN", "NYC", "LAX", "LON", "PRG", "SAO", "ATL", "HND", "MAD", "MIA", "MOS2", "STO", "SYD", "SEA", "TOR", "SJO", "ASH", "HOU", "ATL2"}
+var (
+	Regions           []string
+	RegionsLastUpdate time.Time
+	mu sync.RWMutex
+)
 
 // AggregatedStats are the aggregated stats for an orchestrator
 type AggregatedStats struct {
@@ -53,4 +64,53 @@ func (s *Stats) Scan(value interface{}) error {
 	}
 
 	return json.Unmarshal(b, &s)
+}
+
+func GetRegions() []string {
+	mu.RLock()
+	if !RegionsLastUpdate.IsZero() && time.Since(RegionsLastUpdate).Seconds() < 60 {
+		// return cached list of regions
+		defer mu.RUnlock()
+		return Regions
+	}
+	mu.RUnlock()
+	
+	mu.Lock()
+	defer mu.Unlock()
+
+	catalystJSONURL, exists := os.LookupEnv("CATALYSTS_JSON")
+	if !exists {
+		catalystJSONURL = "https://livepeer.github.io/livepeer-infra/catalysts.json"
+	}
+
+	resp, err := http.Get(catalystJSONURL)
+	if err != nil {
+		log.Printf("Can't fetch the %s: %s", catalystJSONURL, err)
+		return Regions // return previosuly cached list of regions
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Can't read the %s: %s", catalystJSONURL, err)
+		return Regions // return previosuly cached list of regions
+	}
+
+	type catalystEnvData struct {
+		Counts    map[string]int `json:"counts"`
+		Urls      []string       `json:"urls"`
+		GlobalUrl string         `json:"global_url"`
+	}
+	var catalystData map[string]catalystEnvData
+	err = json.Unmarshal(body, &catalystData)
+	if err != nil {
+		log.Printf("Can't parse the %s: %s", catalystJSONURL, err)
+		return Regions // return previosuly cached list of regions
+	}
+	Regions = []string{}
+	for region := range catalystData["prod"].Counts {
+		Regions = append(Regions, strings.ToUpper(region))
+	}
+	RegionsLastUpdate = time.Now()
+	return Regions
 }

@@ -60,7 +60,7 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func isValidRegion(region string) bool {
-	for _, reg := range models.Regions {
+	for _, reg := range models.GetRegions() {
 		if reg == region {
 			return true
 		}

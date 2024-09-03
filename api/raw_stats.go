@@ -59,7 +59,7 @@ func RawStatsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	searchRegions := models.Regions
+	searchRegions := models.GetRegions()
 	if region != "" {
 		searchRegions = []string{region}
 	}
