@@ -1,0 +1,129 @@
+{
+  "regions": [
+    {
+      "id": "GLOBAL",
+      "name": "Global",
+      "type": "transcoding"
+    },
+    {
+      "id": "ATL",
+      "name": "Atlanta",
+      "type": "transcoding"
+    },
+    {
+      "id": "ATL2",
+      "name": "Atlanta 2",
+      "type": "transcoding"
+    },
+    {
+      "id": "MDW",
+      "name": "Chicago",
+      "type": "transcoding"
+    },
+    {
+      "id": "FRA",
+      "name": "Frankfurt",
+      "type": "transcoding"
+    },
+    {
+      "id": "HOU",
+      "name": "Houston",
+      "type": "transcoding"
+    },
+    {
+      "id": "LON",
+      "name": "London",
+      "type": "transcoding"
+    },
+    {
+      "id": "LAX",
+      "name": "Los Angeles",
+      "type": "transcoding"
+    },
+    {
+      "id": "MAD",
+      "name": "Madrid",
+      "type": "transcoding"
+    },
+    {
+      "id": "MIA",
+      "name": "Miami",
+      "type": "transcoding"
+    },
+    {
+      "id": "MOS2",
+      "name": "Moscow",
+      "type": "transcoding"
+    },
+    {
+      "id": "ASH",
+      "name": "Nashua",
+      "type": "transcoding"
+    },
+    {
+      "id": "NYC",
+      "name": "New York City",
+      "type": "transcoding"
+    },
+    {
+      "id": "PRG",
+      "name": "Prague",
+      "type": "transcoding"
+    },
+    {
+      "id": "SJO",
+      "name": "San Jose",
+      "type": "transcoding"
+    },
+    {
+      "id": "SAO",
+      "name": "São Paulo",
+      "type": "transcoding"
+    },
+    {
+      "id": "SEA",
+      "name": "Seattle",
+      "type": "transcoding"
+    },
+    {
+      "id": "SIN",
+      "name": "Singapore",
+      "type": "transcoding"
+    },
+    {
+      "id": "STO",
+      "name": "Stockholm",
+      "type": "transcoding"
+    },
+    {
+      "id": "SYD",
+      "name": "Sydney",
+      "type": "transcoding"
+    },
+    {
+      "id": "HND",
+      "name": "Tokyo",
+      "type": "transcoding"
+    },
+    {
+      "id": "TOR",
+      "name": "Toronto",
+      "type": "transcoding"
+    },
+    {
+      "id": "GLOBAL",
+      "name": "Global",
+      "type": "ai"
+    },
+    {
+      "id": "FRA",
+      "name": "Frankfurt",
+      "type": "ai"
+    },
+    {
+      "id": "LAX",
+      "name": "Los Angeles",
+      "type": "ai"
+    }
+  ]
+}

@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/livepeer/leaderboard-serverless/common"
@@ -22,10 +22,8 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	middleware.HandlePreflightRequest(w, r)
 
-	var stats models.Stats
-
 	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		common.HandleBadRequest(w, err)
 		return
@@ -39,6 +37,7 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var stats models.Stats
 	// Unmarshal the json, return 400 if error
 	if err := json.Unmarshal([]byte(body), &stats); err != nil {
 		common.HandleBadRequest(w, err)
@@ -60,8 +59,13 @@ func PostStatsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func isValidRegion(region string) bool {
-	for _, reg := range models.GetRegions() {
-		if reg == region {
+	knownRegions, err := db.Store.Regions()
+	if err != nil {
+		common.Logger.Error(`Error getting regions while validating region: {region}`, err)
+		return false
+	}
+	for _, reg := range knownRegions {
+		if reg.Name == region {
 			return true
 		}
 	}
