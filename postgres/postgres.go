@@ -15,6 +15,8 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/livepeer/leaderboard-serverless/assets"
 	"github.com/livepeer/leaderboard-serverless/common"
+	"github.com/livepeer/leaderboard-serverless/db/cache"
+	"github.com/livepeer/leaderboard-serverless/db/interfaces"
 	"github.com/livepeer/leaderboard-serverless/models"
 )
 
@@ -26,12 +28,14 @@ type Item struct {
 type DB struct {
 	pool             *pgxpool.Pool
 	connectionString string
+	internalCache    cache.Cache
+	dbJobManager     interfaces.DBManager
 }
 
 var configuredDbTimeout = common.EnvOrDefault("DB_TIMEOUT", 20).(int)
 var defaultTimeout = time.Duration(configuredDbTimeout) * time.Second
 
-func Start(connectionUrl string) (*DB, error) {
+func Start(connectionUrl string, internalCache cache.Cache, dbJobManager interfaces.DBManager) (*DB, error) {
 	common.Logger.Info("Creating connection to database")
 	var err error
 	ctx, cancel := WithTimeout()
@@ -40,7 +44,7 @@ func Start(connectionUrl string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db := &DB{pool, connectionUrl}
+	db := &DB{pool, connectionUrl, internalCache, dbJobManager}
 
 	if err := db.ensureDatabase(); err != nil {
 		return nil, err
@@ -328,10 +332,35 @@ func (db *DB) RawStats(query *models.StatsQuery) ([]*models.Stats, error) {
 	return stats, err
 }
 
+// Regions returns the regions from the database or the cache if available
 func (db *DB) Regions() ([]*models.Region, error) {
 
-	var regions []*models.Region
+	//check the cache for non-expired regions
+	cacheResults := db.internalCache.GetRegions()
+	if cacheResults.CacheHit && !cacheResults.CacheExpired {
+		return cacheResults.Results.([]*models.Region), nil
+	}
 
+	// the cache has expired or is empty, so before we retrieve the regions from the database
+	// we will run any job manager activities to ensure the regions are up to date
+	db.dbJobManager.UpdateRegions()
+
+	regions, err := db.retrieveRegionsFromStore()
+	//update the cache with the new regions if there was no error
+	if err == nil {
+		db.internalCache.UpdateRegions(regions)
+	} else {
+		//since we got an error, we will invalidate the cache to ensure we don't keep returning stale data
+		common.Logger.Error("Failed to retrieve regions from the database.  Cache will be invalidated.  Error: %v", err)
+		db.internalCache.InvalidateRegionsCache()
+	}
+
+	return regions, err
+}
+
+// retrieveRegionsFromStore retrieves the regions from the database without using the cache
+func (db *DB) retrieveRegionsFromStore() ([]*models.Region, error) {
+	var regions []*models.Region
 	err := db.withConnection(func(ctx context.Context, conn *pgxpool.Conn) error {
 		qry := "SELECT r.name, r.display_name, jt.name AS type FROM regions r INNER JOIN job_types jt ON jt.id = r.job_type_id"
 		rows, err := conn.Query(ctx, qry)
@@ -379,26 +408,56 @@ func (db *DB) InsertRegions(regions []*models.Region) (int, int) {
 		common.Logger.Debug("Inserted %d out of %d regions", regionsInserted, len(regions))
 		return nil
 	})
+
+	//update the cache if new regions were inserted
+	if regionsInserted > 0 {
+		newRegions, err := db.retrieveRegionsFromStore()
+		if err != nil {
+			common.Logger.Error("Failed to retrieve regions while updating the cache after inserting a new region.  Cache will be invalidated.  Error: %v", err)
+			db.internalCache.InvalidateRegionsCache()
+		} else {
+			db.internalCache.UpdateRegions(newRegions)
+		}
+	}
 	return regionsInserted, regionsProcessed
 }
 
 func (db *DB) Pipelines(query *models.StatsQuery) ([]*models.Pipeline, error) {
+
+	//check the cache for non-expired regions
+	cacheResults := db.internalCache.GetPipelines()
+	if cacheResults.CacheHit && !cacheResults.CacheExpired {
+		return cacheResults.Results.([]*models.Pipeline), nil
+	}
+
 	pipelines := []*models.Pipeline{}
 
 	err := db.withConnection(func(ctx context.Context, conn *pgxpool.Conn) error {
-		qry := `SELECT pipeline, models, regions FROM get_pipelines($1, $2, $3) ORDER BY pipeline`
+		qry :=
+			`SELECT
+        e.payload ->> 'pipeline' AS pipeline,
+        ARRAY_AGG(DISTINCT e.payload ->> 'model') AS models,
+        ARRAY_AGG(DISTINCT r.name) AS regions
+			FROM events e
+			JOIN regions r ON e.region_id = r.id
+			WHERE
+					e.payload ? 'pipeline' AND
+					e.event_time >= $1 AND
+					e.event_time <= $2`
 
-		// Set region parameter
-		var regionParam interface{}
+		params := []interface{}{query.Since, query.Until}
+
+		// Add region filter if provided
 		if query.Region != "" {
-			regionParam = query.Region
-		} else {
-			regionParam = nil
+			qry += ` AND r.name = $3`
+			params = append(params, query.Region)
 		}
 
-		// Execute the query with parameters
-		common.Logger.Debug("Running query: %v with args: %v, %v, %v", qry, query.Since, query.Until, regionParam)
-		rows, err := conn.Query(ctx, qry, query.Since, query.Until, regionParam)
+		qry += ` GROUP BY pipeline ORDER BY pipeline`
+
+		common.Logger.Debug("Running query: %v with args: %v, %v, %v", qry, query.Since, query.Until, query.Region)
+		rows, err := conn.Query(ctx, qry, params...)
+
 		if err != nil {
 			return err
 		}

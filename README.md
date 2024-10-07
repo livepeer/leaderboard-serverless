@@ -49,7 +49,7 @@ This software can run on many operating systems.  Make sure you have the below s
 
 ### Run Build
 
-`run the go build`
+Run the go build:
 
 `go build -o leaderboard-serverless main.go`
 
@@ -86,8 +86,9 @@ When configuring the API Server, you will use the following environment variable
 * `DB_TIMEOUT` - The time in seconds used for database operations before they will timeout. Default is 20s.
 * `LOG_LEVEL`  - The logging level of the application. Default is INFO.
 * `SECRET` - The secret used in HTTP Authorization headers to authenitcate callers of protected endpoints.  See the section on Endpoint Security.  This is optional is you do not intend to post stats.
-* `CATALYSTS_REGION_URL` - A custom URL point to the Catlyst JSON representing regions to be inserted into the database.
-* `CATALYSTS_REGION_UPDATE_INTERVAL` - The interval in minutes to run the Catalyst region update process.  Default is 60.
+* `REGIONS_CACHE_TIMEOUT` - The timeout for the application to cache regions before retrieving them from the database.  The default is 60 seconds.
+* `PIPELINES_CACHE_TIMEOUT` - The timeout for the application to cache pipelines before retrieving them from the database.  The default is 60 seconds.
+* `CATALYST_REGION_URL` - A custom URL point to the Catlyst JSON representing regions to be inserted into the database.
 
 ### Run the App
 

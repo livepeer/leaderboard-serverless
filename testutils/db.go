@@ -1,4 +1,3 @@
-// file: testutils/db.go
 package testutils
 
 import (

@@ -1,6 +1,7 @@
 package db_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/livepeer/leaderboard-serverless/common"
@@ -14,6 +15,8 @@ func TestMain(m *testing.M) {
 
 func TestUpdateRegions(t *testing.T) {
 
+	os.Setenv("CATALYST_REGION_URL", "https://livepeer.github.io/livepeer-infra/catalysts.json")
+
 	testutils.NewDB(t)
 
 	existingRegionsInDB, err := db.Store.Regions()
@@ -21,11 +24,12 @@ func TestUpdateRegions(t *testing.T) {
 		t.Errorf("Error getting orignial regions for validation: %v", err)
 	}
 
-	regionsFound, err := db.GetCatalystRegions()
+	catalystDataManager := db.NewCatalystDataManager()
+	regionsFound, err := catalystDataManager.GetCatalystRegions()
 	if err != nil {
 		t.Errorf("Error getting regions: %v", err)
 	}
-	totalInserted, totalProcessed := db.UpdateCatalystRegions()
+	totalInserted, totalProcessed := catalystDataManager.UpdateRegions()
 
 	if totalProcessed == 0 {
 		t.Errorf("No regions processed")

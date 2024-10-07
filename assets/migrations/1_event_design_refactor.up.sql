@@ -52,29 +52,3 @@ FROM events e
         INNER JOIN
     job_types j ON r.job_type_id = j.id;
 
--- Create a function to show unique pipelines and models by region and date range
-CREATE OR REPLACE FUNCTION get_pipelines(
-    start_date TIMESTAMPTZ,
-    end_date TIMESTAMPTZ,
-    region_name TEXT DEFAULT NULL
-)
-RETURNS TABLE (
-    pipeline TEXT,
-    models TEXT[],
-    regions TEXT[]
-) AS $$
-    SELECT
-        e.payload ->> 'pipeline' AS pipeline,
-        ARRAY_AGG(DISTINCT e.payload ->> 'model') AS models,
-        ARRAY_AGG(DISTINCT r.name) AS regions
-    FROM events e
-    JOIN regions r ON e.region_id = r.id
-    WHERE
-        e.payload ? 'pipeline' AND
-        e.event_time >= start_date AND
-        e.event_time <= end_date AND
-        (region_name IS NULL OR r.name = region_name)
-    GROUP BY pipeline;
-$$ LANGUAGE sql;
-
-

@@ -7,33 +7,19 @@ import (
 	"syscall"
 
 	"github.com/livepeer/leaderboard-serverless/common"
-	"github.com/livepeer/leaderboard-serverless/models"
+	"github.com/livepeer/leaderboard-serverless/db/cache"
+	"github.com/livepeer/leaderboard-serverless/db/interfaces"
 	"github.com/livepeer/leaderboard-serverless/postgres"
 )
 
-var Store DB
-
-type DB interface {
-	InsertStats(stats *models.Stats) error
-	AggregatedStats(query *models.StatsQuery) (*models.AggregatedStatsResults, error)
-	MedianRTT(query *models.StatsQuery) (float64, error)
-	BestAIRegion(orchestratorId string) (*models.Stats, error)
-	RawStats(query *models.StatsQuery) ([]*models.Stats, error)
-	Regions() ([]*models.Region, error)
-	InsertRegions(regions []*models.Region) (int, int)
-	Pipelines(query *models.StatsQuery) ([]*models.Pipeline, error)
-	Close()
-}
+var Store interfaces.DB
 
 func Start(connectionUrl string) error {
 	if connectionUrl != "" {
-		db, err := postgres.Start(connectionUrl)
+		db, err := postgres.Start(connectionUrl, cache.NewCache(), NewCatalystDataManager())
 		// if not error, cache the handle to the database and set up signal handler for graceful shutdown
 		if err == nil {
 			Store = db
-			// Start the scheduler that reads catalyst json
-			// and updates the regions
-			go StartUpdateRegionsScheduler()
 
 			go handleShutdown()
 			common.Logger.Debug("Database connection pool startup completed.")
