@@ -86,6 +86,7 @@ type Stats struct {
 
 type Error struct {
 	ErrorCode string `json:"error_code" bson:"error_code"`
+	Message   string `json:"message,omitempty" bson:"message,omitempty"`
 	Count     int    `json:"count" bson:"count"`
 }
 

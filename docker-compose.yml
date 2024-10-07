@@ -15,8 +15,7 @@ services:
 
 volumes:
   leaderboard_postgres_data:
-    external:
-      true
+    external: true
 
 networks:
   default:
