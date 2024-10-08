@@ -1,0 +1,14 @@
+{
+  "errors": [],
+  "region": "MDW",
+  "timestamp": 1723741735,
+  "upload_time": 0.7765968238571429,
+  "orchestrator": "0x0fc80afb7876f579f1fb1c4d1c37cf1339038658",
+  "seg_duration": 2.0088571428571425,
+  "success_rate": 1,
+  "download_time": 0.9568952794285714,
+  "segments_sent": 15,
+  "transcode_time": 0.21355154864285741,
+  "round_trip_time": 1.9470436519285717,
+  "segments_received": 30
+}

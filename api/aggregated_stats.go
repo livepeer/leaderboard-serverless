@@ -2,15 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"math"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/livepeer/leaderboard-serverless/common"
 	"github.com/livepeer/leaderboard-serverless/db"
+	"github.com/livepeer/leaderboard-serverless/middleware"
 	"github.com/livepeer/leaderboard-serverless/models"
+	"github.com/livepeer/leaderboard-serverless/score"
 )
 
 // AggregatedStatsHandler handles an aggregated leaderboard stats request
@@ -20,66 +18,39 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "public, max-age=600, stale-while-revalidate=300")
+	middleware.AddStandardHttpHeaders(w)
 
-	//Get the path parameter that was sent
-	query := r.URL.Query()
-	orch := strings.ToLower(query.Get("orchestrator"))
-	region := strings.ToUpper(query.Get("region"))
-	sinceStr := query.Get("since")
-	untilStr := query.Get("until")
-
-	searchRegions := models.GetRegions()
-	if region != "" {
-		searchRegions = []string{region}
+	statsQuery, err := common.ParseStatsQueryParams(r)
+	if err != nil {
+		common.HandleBadRequest(w, err)
+		return
 	}
 
-	var since int64
-	if sinceStr == "" {
-		since = time.Now().Add(-24 * time.Hour).Unix()
-	} else {
-		var err error
-		since, err = strconv.ParseInt(sinceStr, 10, 64)
-		if err != nil {
-			common.HandleBadRequest(w, err)
-		}
+	// since we need to get the median RTT for all Orchs
+	// we will check if a specific orch was requested
+	// and filter them out after we get the aggregated stats
+	orchestrator := statsQuery.Orchestrator
+	if orchestrator != "" {
+		statsQuery.Orchestrator = ""
 	}
 
-	var until int64
-	if untilStr == "" {
-		until = time.Now().Unix()
-	} else {
-		var err error
-		until, err = strconv.ParseInt(untilStr, 10, 64)
-		if err != nil {
-			common.HandleBadRequest(w, err)
-		}
+	aggrStatResult, err := db.Store.AggregatedStats(statsQuery)
+	if err != nil {
+		common.HandleInternalError(w, err)
+		return
 	}
 
-	results := make(map[string]map[string]*models.AggregatedStats)
+	results := score.CreateAggregatedStats(aggrStatResult)
 
-	// TODO: Make this concurrent
-	for _, region := range searchRegions {
-		stats, err := db.Store.AggregatedStats(orch, region, since, until)
-		if err != nil {
-			common.HandleInternalError(w, err)
-			return
-		}
-
-		for _, stat := range stats {
-			_, ok := results[stat.ID]
-			if !ok {
-				results[stat.ID] = make(map[string]*models.AggregatedStats)
+	// if a specific orchestrator was requested, filter out the rest
+	if orchestrator != "" {
+		orchStats, ok := results[orchestrator]
+		if !ok {
+			results = make(map[string]map[string]*models.AggregatedStats)
+		} else {
+			results = map[string]map[string]*models.AggregatedStats{
+				orchestrator: orchStats,
 			}
-			aggrStats := &models.AggregatedStats{
-				ID:             stat.ID,
-				SuccessRate:    stat.SuccessRate,
-				RoundTripScore: normalizeLatencyScore(calculateLatencyScore(stat.SegDuration, stat.RoundTripTime)),
-			}
-			aggrStats.TotalScore = calculateTotalScore(aggrStats)
-			results[stat.ID][region] = aggrStats
 		}
 	}
 
@@ -89,25 +60,8 @@ func AggregatedStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	common.Logger.Trace("Returning aggregated stats: %s", resultsEncoded)
+
 	w.WriteHeader(http.StatusOK)
 	w.Write(resultsEncoded)
-}
-
-func calculateTotalScore(stats *models.AggregatedStats) float64 {
-	if stats == nil {
-		return 0
-	}
-
-	return stats.SuccessRate * stats.RoundTripScore
-}
-
-func calculateLatencyScore(segDuration, latency float64) float64 {
-	if latency == 0 {
-		return 0
-	}
-	return segDuration / latency
-}
-
-func normalizeLatencyScore(score float64) float64 {
-	return 1 - math.Pow(math.E, -score)
 }

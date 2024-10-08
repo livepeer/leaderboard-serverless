@@ -1,0 +1,17 @@
+{
+  "model": "ByteDance/SDXL-Lightning",
+  "errors": [
+    {
+      "count": 1,
+      "error_code": "HTTP-STATUS-503"
+    }
+  ],
+  "region": "MDW",
+  "pipeline": "text-to-image",
+  "timestamp": 1725029035,
+  "orchestrator": "0x22a48674a6fdf9335d89b6dbc05c38e2dc181475",
+  "success_rate": 0,
+  "round_trip_time": 2.21572637,
+  "input_parameters": "{\"guidance_scale\":2,\"height\":512,\"model_id\":\"ByteDance/SDXL-Lightning\",\"num_images_per_prompt\":1,\"num_inference_steps\":6,\"prompt\":\"a bear\",\"safety_check\":false,\"width\":512}",
+  "response_payload": "{\"error\":{\"message\":\"Service Unavailable Error\"}}\n"
+}

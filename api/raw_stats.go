@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/livepeer/leaderboard-serverless/common"
 	"github.com/livepeer/leaderboard-serverless/db"
+	"github.com/livepeer/leaderboard-serverless/middleware"
 	"github.com/livepeer/leaderboard-serverless/models"
 )
 
@@ -21,62 +19,25 @@ func RawStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "public, max-age=600, stale-while-revalidate=300")
+	middleware.AddStandardHttpHeaders(w)
 
-	//Get the path parameter that was sent
-	query := r.URL.Query()
-	orch := strings.ToLower(query.Get("orchestrator"))
-	region := strings.ToUpper(query.Get("region"))
-	sinceStr := query.Get("since")
-	untilStr := query.Get("until")
+	statsQuery, err := common.ParseStatsQueryParams(r)
+	if err != nil {
+		common.HandleBadRequest(w, err)
+		return
+	}
 
-	if orch == "" {
+	if statsQuery.Orchestrator == "" {
 		common.HandleBadRequest(w, errors.New("orchestrator is a required parameter"))
 		return
 	}
 
-	var since int64
-	if sinceStr == "" {
-		since = time.Now().Add(-24 * time.Hour).Unix()
-	} else {
-		var err error
-		since, err = strconv.ParseInt(sinceStr, 10, 64)
-		if err != nil {
-			common.HandleBadRequest(w, err)
-		}
+	stats, err := db.Store.RawStats(statsQuery)
+	if err != nil {
+		common.HandleInternalError(w, err)
+		return
 	}
-
-	var until int64
-	if untilStr == "" {
-		until = time.Now().Unix()
-	} else {
-		var err error
-		until, err = strconv.ParseInt(untilStr, 10, 64)
-		if err != nil {
-			common.HandleBadRequest(w, err)
-		}
-	}
-
-	searchRegions := models.GetRegions()
-	if region != "" {
-		searchRegions = []string{region}
-	}
-
-	results := make(map[string][]*models.Stats)
-
-	// TODO: Make this concurrent
-	for _, region := range searchRegions {
-		stats, err := db.Store.RawStats(orch, region, since, until)
-		if err != nil {
-			common.HandleInternalError(w, err)
-			return
-		}
-		results[region] = stats
-	}
-
-	resultsEncoded, err := json.Marshal(results)
+	resultsEncoded, err := CreateRawStats(stats)
 	if err != nil {
 		common.HandleInternalError(w, err)
 		return
@@ -84,4 +45,17 @@ func RawStatsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(resultsEncoded)
+}
+
+// CreateRawStats creates a map of raw stats by region
+func CreateRawStats(stats []*models.Stats) ([]byte, error) {
+	results := make(map[string][]*models.Stats)
+	for _, stat := range stats {
+		results[stat.Region] = append(results[stat.Region], stat)
+	}
+	resultsEncoded, err := json.Marshal(results)
+	if err != nil {
+		return nil, err
+	}
+	return resultsEncoded, nil
 }
