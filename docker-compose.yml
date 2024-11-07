@@ -16,8 +16,3 @@ services:
 volumes:
   leaderboard_postgres_data:
     external: true
-
-networks:
-  default:
-    name: ingress
-    external: true

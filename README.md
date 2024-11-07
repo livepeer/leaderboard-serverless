@@ -60,7 +60,11 @@ When the build completes, check for the binary file:
 The `<repo-folder>/docker-compose.yml` file will allow you to spin up Postgres with a database 
 called `leaderboad` and user named `leaderboard` and password `leaderboard` **DO NOT USE THESE VALUES FOR PRODUCTION!**
 
-To run a local DB run the following docker command
+To run a local DB, first create an external volume.  This will ensure data is persisted between executions of this service.
+
+`docker volume create leaderboard_postgres_data`
+
+Then you can start the database with the following docker command
 
 `docker compose up -d`
 
