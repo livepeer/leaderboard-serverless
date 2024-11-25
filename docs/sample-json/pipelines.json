@@ -1,0 +1,16 @@
+{
+  "pipelines": [
+    {
+      "id": "text-to-image",
+      "models": ["SG161222/RealVisXL_V4.0_Lightning","SG161222/RealVisXL_V4.0"]
+    },
+    {
+      "id":"text-to-audio",
+      "models":["openai/whisper-large-v3"]
+    },
+    {
+      "id":"image-to-video",
+      "models":["stabilityai/stable-video-diffusion-img2vid-xt-1-1"]
+    }
+  ]
+}
